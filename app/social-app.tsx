@@ -15,6 +15,7 @@ const suiteLinks = [
   { label: "Mail", href: "https://mail.tecnosocialismo.com", mark: "M" },
   { label: "Video", href: VIDEO_ORIGIN, mark: "V" },
   { label: "Social", href: SOCIAL_ORIGIN, mark: "S", current: true },
+  { label: "Messaggi", href: "https://messaggi.tecnosocialismo.com", mark: "G" },
   { label: "Account", href: "https://login.tecnosocialismo.com", mark: "A" },
 ];
 
