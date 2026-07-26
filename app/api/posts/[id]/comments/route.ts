@@ -1,6 +1,6 @@
 import { getSuiteUser } from "@/lib/auth";
 import { publicComment, safeText, type StoredComment } from "@/lib/social";
-import { listComments, readPost, saveComment, updatePost } from "@/lib/store";
+import { listComments, readPost, saveComment } from "@/lib/store";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -18,6 +18,5 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!body) return Response.json({ error: "Il commento è vuoto." }, { status: 400 });
   const comment: StoredComment = { id: crypto.randomUUID(), postId: id, authorId: user.id, authorName: user.name, body, createdAt: new Date().toISOString() };
   await saveComment(comment);
-  const post = await updatePost(id, (current) => ({ ...current, commentCount: current.commentCount + 1 }));
-  return Response.json({ comment: publicComment(comment), commentCount: post?.commentCount ?? 1 }, { status: 201 });
+  return Response.json({ comment: publicComment(comment), commentCount: (await listComments(id)).length }, { status: 201 });
 }

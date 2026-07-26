@@ -55,6 +55,41 @@ export async function setLike(postId: string, userId: string, liked: boolean) {
   else await del(pathname).catch(() => undefined);
 }
 
+export async function countLikes(postId: string) {
+  const result = await list({ prefix: `${LIKE_PREFIX}${postId}/`, limit: 1000 });
+  return result.blobs.length;
+}
+
+export async function interactionSummary(viewerId?: string) {
+  const [likes, comments] = await Promise.all([
+    list({ prefix: LIKE_PREFIX, limit: 1000 }),
+    list({ prefix: COMMENT_PREFIX, limit: 1000 }),
+  ]);
+  const likeCounts = new Map<string, number>();
+  const commentCounts = new Map<string, number>();
+  const likedPosts = new Set<string>();
+  for (const blob of likes.blobs) {
+    const [, postId, filename] = blob.pathname.split("/");
+    if (!postId || !filename) continue;
+    likeCounts.set(postId, (likeCounts.get(postId) ?? 0) + 1);
+    if (viewerId && filename === `${safeKey(viewerId)}.json`) likedPosts.add(postId);
+  }
+  for (const blob of comments.blobs) {
+    const [, postId] = blob.pathname.split("/");
+    if (postId) commentCounts.set(postId, (commentCounts.get(postId) ?? 0) + 1);
+  }
+  return { likeCounts, commentCounts, likedPosts };
+}
+
+export async function removePost(id: string) {
+  const [comments, likes] = await Promise.all([
+    list({ prefix: `${COMMENT_PREFIX}${id}/`, limit: 1000 }),
+    list({ prefix: `${LIKE_PREFIX}${id}/`, limit: 1000 }),
+  ]);
+  const paths = [`${POST_PREFIX}${id}.json`, ...comments.blobs.map((item) => item.pathname), ...likes.blobs.map((item) => item.pathname)];
+  await del(paths);
+}
+
 async function writeJson(pathname: string, value: unknown, allowOverwrite: boolean) {
   await put(pathname, JSON.stringify(value), {
     access: "private", addRandomSuffix: false, allowOverwrite,

@@ -1,5 +1,5 @@
 import { getSuiteUser } from "@/lib/auth";
-import { hasLike, readPost, setLike, updatePost } from "@/lib/store";
+import { countLikes, hasLike, readPost, setLike } from "@/lib/store";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const user = await getSuiteUser(new Headers(request.headers));
@@ -8,6 +8,5 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!(await readPost(id))) return Response.json({ error: "Contenuto non trovato." }, { status: 404 });
   const liked = await hasLike(id, user.id);
   await setLike(id, user.id, !liked);
-  const post = await updatePost(id, (current) => ({ ...current, likeCount: Math.max(0, current.likeCount + (liked ? -1 : 1)) }));
-  return Response.json({ liked: !liked, likeCount: post?.likeCount ?? 0 });
+  return Response.json({ liked: !liked, likeCount: await countLikes(id) });
 }

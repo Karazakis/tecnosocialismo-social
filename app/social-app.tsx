@@ -90,7 +90,7 @@ export function SocialApp({ user }: { user: SuiteUser | null }) {
         </header>
 
         <section className="post-list" aria-live="polite">
-          {loading ? <LoadingFeed /> : !configured ? <Empty title="Archivio da collegare" body="L’interfaccia è pronta: manca il collegamento allo spazio dati." /> : visible.length === 0 ? <Empty title={posts.length ? "Nessun risultato" : "Lo spazio è pronto"} body={posts.length ? "Prova una ricerca diversa o torna al feed completo." : "Pubblica il primo pensiero, una domanda o un video della comunità."} /> : visible.map((post) => <PostCard key={post.id} post={post} user={user} loginUrl={loginUrl} onAuthor={() => setActiveAuthor(post.authorId)} replace={replacePost} toast={toast} />)}
+          {loading ? <LoadingFeed /> : !configured ? <Empty title="Archivio da collegare" body="L’interfaccia è pronta: manca il collegamento allo spazio dati." /> : visible.length === 0 ? <Empty title={posts.length ? "Nessun risultato" : "Lo spazio è pronto"} body={posts.length ? "Prova una ricerca diversa o torna al feed completo." : "Pubblica il primo pensiero, una domanda o un video della comunità."} /> : visible.map((post) => <PostCard key={post.id} post={post} user={user} loginUrl={loginUrl} onAuthor={() => setActiveAuthor(post.authorId)} replace={replacePost} remove={(id) => setPosts((current) => current.filter((item) => item.id !== id))} toast={toast} />)}
         </section>
       </main>
 
@@ -134,7 +134,7 @@ function Composer({ user, loginUrl, reference, onCreated, toast }: { user: Suite
   </div>;
 }
 
-function PostCard({ post, user, loginUrl, onAuthor, replace, toast }: { post: PublicPost; user: SuiteUser | null; loginUrl: string; onAuthor: () => void; replace: (id: string, mutate: (post: PublicPost) => PublicPost) => void; toast: (value: string) => void }) {
+function PostCard({ post, user, loginUrl, onAuthor, replace, remove, toast }: { post: PublicPost; user: SuiteUser | null; loginUrl: string; onAuthor: () => void; replace: (id: string, mutate: (post: PublicPost) => PublicPost) => void; remove: (id: string) => void; toast: (value: string) => void }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState<PublicComment[] | null>(null);
   const [commentBody, setCommentBody] = useState("");
@@ -175,13 +175,20 @@ function PostCard({ post, user, loginUrl, onAuthor, replace, toast }: { post: Pu
     try { await navigator.clipboard.writeText(url); toast("Collegamento copiato."); } catch { toast("Copia il collegamento dalla barra del browser."); }
   }
 
+  async function deletePost() {
+    if (!window.confirm("Eliminare definitivamente questo contenuto?")) return;
+    const response = await fetch(`/api/posts/${post.id}`, { method: "DELETE" }).catch(() => null);
+    if (!response?.ok) { toast("Non è stato possibile eliminare il contenuto."); return; }
+    remove(post.id); toast("Contenuto eliminato.");
+  }
+
   return <article className="post-card" id={`post-${post.id}`}>
     <button className="post-avatar" onClick={onAuthor}>{initials(post.authorName)}</button>
     <div className="post-content">
       <header><button onClick={onAuthor}>{post.authorName}</button><span>·</span><time dateTime={post.createdAt}>{relativeTime(post.createdAt)}</time><i>CRONO</i></header>
       {post.body && <p className="post-body">{post.body}</p>}
       {post.videoId && (post.video ? <div className="embedded-video"><video controls preload="metadata" poster={post.video.hasPoster ? `${VIDEO_ORIGIN}/api/videos/${post.video.id}/poster` : undefined} src={`${VIDEO_ORIGIN}/api/videos/${post.video.id}/stream`} /><a href={`${VIDEO_ORIGIN}/watch/${post.video.id}`}><span><b>{post.video.title}</b><small>{post.video.ownerName} · {formatDuration(post.video.durationSeconds)}</small></span><Icon name="arrow" /></a></div> : <a className="missing-video" href={`${VIDEO_ORIGIN}/watch/${post.videoId}`}>Questo video non è più nel catalogo pubblico <Icon name="arrow" /></a>)}
-      <footer className="post-actions"><button className={post.likedByViewer ? "liked" : ""} onClick={like}><Icon name="heart" /><span>{post.likeCount || "Apprezza"}</span></button><button onClick={toggleComments}><Icon name="comment" /><span>{post.commentCount || "Rispondi"}</span></button><button onClick={share}><Icon name="share" /><span>Condividi</span></button></footer>
+      <footer className="post-actions"><button className={post.likedByViewer ? "liked" : ""} onClick={like}><Icon name="heart" /><span>{post.likeCount || "Apprezza"}</span></button><button onClick={toggleComments}><Icon name="comment" /><span>{post.commentCount || "Rispondi"}</span></button><button onClick={share}><Icon name="share" /><span>Condividi</span></button>{user?.id === post.authorId && <button className="delete-action" onClick={deletePost}><Icon name="trash" /><span>Elimina</span></button>}</footer>
       {commentsOpen && <section className="comments"><div className="comment-list">{comments === null ? <span>Caricamento…</span> : comments.length === 0 ? <span>Apri tu la conversazione.</span> : comments.map((item) => <div className="comment" key={item.id}><i>{initials(item.authorName)}</i><p><strong>{item.authorName}</strong><time>{relativeTime(item.createdAt)}</time><span>{item.body}</span></p></div>)}</div><form onSubmit={comment}><span>{user ? initials(user.name) : "?"}</span><textarea value={commentBody} onChange={(event) => setCommentBody(event.target.value)} placeholder={user ? "Scrivi una risposta…" : "Accedi per rispondere"} maxLength={1200} /><button disabled={busy || !commentBody.trim()}><Icon name="arrow" /></button></form></section>}
     </div>
   </article>;
@@ -195,7 +202,7 @@ function relativeTime(value: string) { const seconds = Math.max(0, Math.floor((D
 
 function Icon({ name }: { name: string }) {
   const paths: Record<string, React.ReactNode> = {
-    search: <><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>, close: <><path d="m6 6 12 12M18 6 6 18"/></>, plus: <><path d="M12 5v14M5 12h14"/></>, menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>, home: <><path d="m3 11 9-7 9 7v9H6v-9"/><path d="M10 20v-6h4v6"/></>, people: <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2-7 6-7s6 3 6 7M16 5c3 0 4 2 4 4s-1 3-3 3M17 14c3 1 4 3 4 6"/></>, hash: <><path d="M10 3 8 21M16 3l-2 18M4 9h17M3 15h17"/></>, user: <><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></>, arrow: <><path d="M5 12h14M14 7l5 5-5 5"/></>, play: <><path d="m8 5 11 7-11 7Z"/></>, heart: <><path d="M20 8c0 6-8 11-8 11S4 14 4 8c0-4 5-5 8-1 3-4 8-3 8 1Z"/></>, comment: <><path d="M4 5h16v11H9l-5 4Z"/></>, share: <><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5M8 13l8 5"/></>,
+    search: <><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>, close: <><path d="m6 6 12 12M18 6 6 18"/></>, plus: <><path d="M12 5v14M5 12h14"/></>, menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>, home: <><path d="m3 11 9-7 9 7v9H6v-9"/><path d="M10 20v-6h4v6"/></>, people: <><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2-7 6-7s6 3 6 7M16 5c3 0 4 2 4 4s-1 3-3 3M17 14c3 1 4 3 4 6"/></>, hash: <><path d="M10 3 8 21M16 3l-2 18M4 9h17M3 15h17"/></>, user: <><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></>, arrow: <><path d="M5 12h14M14 7l5 5-5 5"/></>, play: <><path d="m8 5 11 7-11 7Z"/></>, heart: <><path d="M20 8c0 6-8 11-8 11S4 14 4 8c0-4 5-5 8-1 3-4 8-3 8 1Z"/></>, comment: <><path d="M4 5h16v11H9l-5 4Z"/></>, share: <><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5M8 13l8 5"/></>, trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></>,
   };
   return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
 }

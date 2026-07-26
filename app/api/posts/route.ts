@@ -1,6 +1,6 @@
 import { getSuiteUser } from "@/lib/auth";
 import { safeText, videoIdFrom, type PublicPost, type StoredPost } from "@/lib/social";
-import { hasLike, listPosts, savePost } from "@/lib/store";
+import { interactionSummary, listPosts, savePost } from "@/lib/store";
 import { findPublicVideo, listPublicVideos } from "@/lib/video";
 
 export async function GET(request: Request) {
@@ -8,13 +8,15 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const author = safeText(url.searchParams.get("author"), 180) || undefined;
   const user = await getSuiteUser(new Headers(request.headers));
-  const [records, videos] = await Promise.all([listPosts(author), listPublicVideos()]);
+  const [records, videos, interactions] = await Promise.all([listPosts(author), listPublicVideos(), interactionSummary(user?.id)]);
   const videoMap = new Map(videos.map((video) => [video.id, video]));
-  const posts: PublicPost[] = await Promise.all(records.slice(0, 100).map(async (post) => ({
+  const posts: PublicPost[] = records.slice(0, 100).map((post) => ({
     ...post,
-    likedByViewer: user ? await hasLike(post.id, user.id) : false,
+    likeCount: interactions.likeCounts.get(post.id) ?? 0,
+    commentCount: interactions.commentCounts.get(post.id) ?? 0,
+    likedByViewer: interactions.likedPosts.has(post.id),
     video: post.videoId ? videoMap.get(post.videoId) ?? null : null,
-  })));
+  }));
   return Response.json({ posts, configured: true }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
