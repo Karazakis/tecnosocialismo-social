@@ -7,6 +7,16 @@ import type { PublicComment, PublicPost } from "@/lib/social";
 
 const VIDEO_ORIGIN = "https://video.tecnosocialismo.com";
 const SOCIAL_ORIGIN = "https://social.tecnosocialismo.com";
+const suiteLinks = [
+  { label: "Home", href: "https://tecnosocialismo.com", mark: "T" },
+  { label: "Iskra", href: "https://iskra.tecnosocialismo.com", mark: "I" },
+  { label: "Rizoma", href: "https://rizoma.tecnosocialismo.com", mark: "R" },
+  { label: "Cloud", href: "https://cloud.tecnosocialismo.com", mark: "C" },
+  { label: "Mail", href: "https://mail.tecnosocialismo.com", mark: "M" },
+  { label: "Video", href: VIDEO_ORIGIN, mark: "V" },
+  { label: "Social", href: SOCIAL_ORIGIN, mark: "S", current: true },
+  { label: "Account", href: "https://login.tecnosocialismo.com", mark: "A" },
+];
 
 export function SocialApp({ user }: { user: SuiteUser | null }) {
   const [posts, setPosts] = useState<PublicPost[]>([]);
@@ -70,7 +80,7 @@ export function SocialApp({ user }: { user: SuiteUser | null }) {
           {user && <button className={activeAuthor === user.id ? "active" : ""} onClick={() => { setActiveAuthor(user.id); setMenuOpen(false); }}><Icon name="user" />Il mio profilo</button>}
         </nav>
         <div className="principles"><p>COME FUNZIONA</p><div><b>01</b> Ordine cronologico</div><div><b>02</b> Nessuna pubblicità</div><div><b>03</b> Regole leggibili</div></div>
-        <div className="suite"><p>ECOSISTEMA</p><a href="https://iskra.tecnosocialismo.com"><i>I</i>Iskra</a><a href="https://rizoma.tecnosocialismo.com"><i>R</i>Rizoma</a><a href="https://cloud.tecnosocialismo.com"><i>C</i>Cloud</a><a href="https://mail.tecnosocialismo.com"><i>M</i>Mail</a><a href={VIDEO_ORIGIN}><i>V</i>Video</a></div>
+        <div className="suite"><p>ECOSISTEMA</p>{suiteLinks.map((link) => <a className={link.current ? "current" : ""} aria-current={link.current ? "page" : undefined} href={link.href} key={link.label}><i>{link.mark}</i>{link.label}</a>)}</div>
       </aside>
       {menuOpen && <button className="mobile-scrim" onClick={() => setMenuOpen(false)} aria-label="Chiudi menu" />}
 
