@@ -136,8 +136,8 @@ export function SocialApp({ user }: { user: SuiteUser | null }) {
         <a className="brand" href="https://tecnosocialismo.com" aria-label="Tecnosocialismo"><span className="brand-orbit"><i /></span><span>TECNO<br />SOCIALISMO</span></a>
         <Link className="service-name" href="/"><b>SOCIAL</b><i>RETE APERTA</i></Link>
         <label className="global-search"><Icon name="search" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cerca nella rete" aria-label="Cerca nella rete" />{query && <button onClick={() => setQuery("")} aria-label="Pulisci la ricerca"><Icon name="close" /></button>}<kbd>⌘ K</kbd></label>
-        <a className="messages-link" href="https://messaggi.tecnosocialismo.com" aria-label="Apri Messaggi"><Icon name="message" /><span>Messaggi</span></a>
-        <button className="primary-action" onClick={openComposer}><Icon name="plus" /><span>Crea</span></button>
+        <button className="primary-action" onClick={openComposer}><Icon name="plus" /><span>Pubblica</span></button>
+        <SuiteMenu />
         {user ? <a className="account" href="https://login.tecnosocialismo.com" title={user.email}><span>{initials(user.name)}</span><strong>{user.name}</strong></a> : <a className="login-link" href={loginUrl}>Accedi</a>}
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Apri menu"><Icon name="menu" /></button>
       </header>
@@ -318,6 +318,7 @@ function PostCard({ post, user, loginUrl, viewerId, onAuthor, onTopic, onFollow,
 }
 
 function NeuralPulse() { return <div className="neural-pulse" aria-hidden="true"><i className="node-core" /><i className="node n1" /><i className="node n2" /><i className="node n3" /><i className="node n4" /><span className="orbit o1" /><span className="orbit o2" /><span className="orbit o3" /></div>; }
+function SuiteMenu() { return <details className="suite-menu"><summary aria-label="Apri tutti i servizi"><span className="suite-dots" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</span><span className="suite-label">Servizi</span></summary><div><p>UN ECOSISTEMA · UN ACCOUNT</p>{suiteLinks.map((link) => <a className={link.current ? "current" : ""} aria-current={link.current ? "page" : undefined} href={link.href} key={link.label}><i>{link.mark}</i><span>{link.label}</span><b>↗</b></a>)}</div></details>; }
 function Avatar({ name, tone, onClick }: { name: string; tone?: "orange"; onClick?: () => void }) { const content = <>{initials(name)}<i /></>; return onClick ? <button className={`avatar ${tone ?? ""}`} onClick={onClick} aria-label={`Apri il profilo di ${name}`}>{content}</button> : <span className={`avatar ${tone ?? ""}`}>{content}</span>; }
 function LoadingFeed() { return <div className="loading-feed">{[1, 2, 3].map((item) => <i key={item} />)}</div>; }
 function Empty({ icon, title, body, action }: { icon: string; title: string; body: string; action?: { label: string; run: () => void } }) { return <div className="empty-feed"><span><Icon name={icon} /></span><div><h3>{title}</h3><p>{body}</p>{action && <button onClick={action.run}>{action.label}<Icon name="arrow" /></button>}</div></div>; }
