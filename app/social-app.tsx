@@ -16,7 +16,11 @@ const suiteLinks = [
   { label: "Mail", href: "https://mail.tecnosocialismo.com", mark: "M" },
   { label: "Video", href: VIDEO_ORIGIN, mark: "V" },
   { label: "Social", href: SOCIAL_ORIGIN, mark: "S", current: true },
+  { label: "Sport", href: "https://sport.tecnosocialismo.com", mark: "F" },
+  { label: "Market", href: "https://market.tecnosocialismo.com", mark: "K" },
+  { label: "Lavoro", href: "https://lavoro.tecnosocialismo.com", mark: "L" },
   { label: "Messaggi", href: "https://messaggi.tecnosocialismo.com", mark: "G" },
+  { label: "Militant", href: "https://militant.tecnosocialismo.com", mark: "P" },
   { label: "Account", href: "https://login.tecnosocialismo.com", mark: "A" },
 ];
 
