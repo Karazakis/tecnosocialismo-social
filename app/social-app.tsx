@@ -10,19 +10,20 @@ const VIDEO_ORIGIN = "https://video.tecnosocialismo.com";
 const SOCIAL_ORIGIN = "https://social.tecnosocialismo.com";
 const suiteLinks = [
   { label: "Home", href: "https://tecnosocialismo.com", mark: "T" },
-  { label: "Iskra", href: "https://iskra.tecnosocialismo.com", mark: "I" },
   { label: "Rizoma", href: "https://rizoma.tecnosocialismo.com", mark: "R" },
+  { label: "Iskra", href: "https://iskra.tecnosocialismo.com", mark: "I" },
   { label: "Cloud", href: "https://cloud.tecnosocialismo.com", mark: "C" },
   { label: "Mail", href: "https://mail.tecnosocialismo.com", mark: "M" },
   { label: "Video", href: VIDEO_ORIGIN, mark: "V" },
+  { label: "Musica", href: "https://musica.tecnosocialismo.com", mark: "U" },
   { label: "Social", href: SOCIAL_ORIGIN, mark: "S", current: true },
+  { label: "Messaggi", href: "https://messaggi.tecnosocialismo.com", mark: "G" },
   { label: "Sport", href: "https://sport.tecnosocialismo.com", mark: "F" },
   { label: "Market", href: "https://market.tecnosocialismo.com", mark: "K" },
   { label: "Lavoro", href: "https://lavoro.tecnosocialismo.com", mark: "L" },
   { label: "Azienda", href: "https://azienda.tecnosocialismo.com", mark: "Z" },
   { label: "Servizi", href: "https://servizi.tecnosocialismo.com", mark: "E" },
   { label: "Biblioteca", href: "https://biblioteca.tecnosocialismo.com", mark: "B" },
-  { label: "Messaggi", href: "https://messaggi.tecnosocialismo.com", mark: "G" },
   { label: "Militant", href: "https://militant.tecnosocialismo.com", mark: "P" },
   { label: "Account", href: "https://login.tecnosocialismo.com", mark: "A" },
 ];
@@ -155,9 +156,6 @@ export function SocialApp({ user }: { user: SuiteUser | null }) {
           <p>ESPLORA</p>
           {feedModes.map((item) => <button key={item.id} className={feedMode === item.id && !activeAuthor && !activeTopic ? "active" : ""} onClick={() => selectMode(item.id)}><Icon name={item.icon} /><span>{item.label}</span>{item.id === "signal" && <em>AI</em>}</button>)}
         </nav>
-        <div className="rail-divider" />
-        <nav className="utility-nav" aria-label="Collegamenti"><a href="https://video.tecnosocialismo.com"><Icon name="video" /><span>Video</span><small>↗</small></a><a href="https://messaggi.tecnosocialismo.com"><Icon name="message" /><span>Messaggi</span><small>↗</small></a><a href="https://cloud.tecnosocialismo.com"><Icon name="cloud" /><span>Cloud</span><small>↗</small></a></nav>
-        <div className="suite-grid"><p>ECOSISTEMA</p>{suiteLinks.map((link) => <a href={link.href} key={link.label} className={link.current ? "current" : ""} title={link.label}><i>{link.mark}</i></a>)}</div>
         <footer><span><i /> SISTEMI OPERATIVI</span><small>Social · preview pubblica</small></footer>
       </aside>
       {menuOpen && <button className="mobile-scrim" onClick={() => setMenuOpen(false)} aria-label="Chiudi menu" />}
