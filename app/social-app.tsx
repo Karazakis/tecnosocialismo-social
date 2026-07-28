@@ -20,6 +20,7 @@ const suiteLinks = [
   { label: "Market", href: "https://market.tecnosocialismo.com", mark: "K" },
   { label: "Lavoro", href: "https://lavoro.tecnosocialismo.com", mark: "L" },
   { label: "Azienda", href: "https://azienda.tecnosocialismo.com", mark: "Z" },
+  { label: "Servizi", href: "https://servizi.tecnosocialismo.com", mark: "E" },
   { label: "Messaggi", href: "https://messaggi.tecnosocialismo.com", mark: "G" },
   { label: "Militant", href: "https://militant.tecnosocialismo.com", mark: "P" },
   { label: "Account", href: "https://login.tecnosocialismo.com", mark: "A" },
